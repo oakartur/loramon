@@ -81,8 +81,10 @@ export default function DashboardPage() {
   useEffect(() => {
     (async () => {
       try {
-        const apps = await getJSON<string[]>('/api/catalog/applications');
-        setApplications(apps);
+        const apps = await getJSON<{ value: string; label: string }[]>(
+          '/api/catalog/applications',
+        );
+        setApplications(apps.map((a) => a.value));
       } catch {
         setApplications([]);
       }
@@ -130,8 +132,8 @@ export default function DashboardPage() {
         const url = application
           ? `/api/catalog/devices?application=${encodeURIComponent(application)}`
           : '/api/catalog/devices';
-        const devs = await getJSON<Device[]>(url);
-        setDevices(devs);
+        const devs = await getJSON<{ value: string; label: string }[]>(url);
+        setDevices(devs.map((d) => ({ id: d.value, name: d.label })));
       } catch {
         setDevices([]);
       } finally {
@@ -150,8 +152,10 @@ export default function DashboardPage() {
         const params = new URLSearchParams();
         if (application) params.set('application', application);
         if (device) params.set('device', device);
-        const mets = await getJSON<string[]>(`/api/catalog/metrics?${params.toString()}`);
-        setMetrics(mets);
+        const mets = await getJSON<{ value: string; label: string }[]>(
+          `/api/catalog/metrics?${params.toString()}`,
+        );
+        setMetrics(mets.map((m) => m.value));
       } catch {
         setMetrics([]);
       } finally {
