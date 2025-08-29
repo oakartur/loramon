@@ -23,9 +23,9 @@ app.include_router(sensors.router, prefix="/api")
 app.include_router(placements.router, prefix="/api")
 app.include_router(thresholds.router, prefix="/api")
 app.include_router(timeseries.router, prefix="/api")
-app.include_router(metrics.router)
-app.include_router(sql.router)
-app.include_router(catalog.router)
+app.include_router(metrics.router, prefix="/api")
+app.include_router(sql.router, prefix="/api")
+app.include_router(catalog.router, prefix="/api")
 
 @app.get("/-/health")
 def health():
