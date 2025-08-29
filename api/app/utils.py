@@ -6,7 +6,7 @@ from jose import jwt, JWTError
 # Segurança via Authorization: Bearer <token>
 bearer = HTTPBearer(auto_error=False)
 
-SECRET_KEY = os.getenv("JWT_SECRET", "dev-secret-change-me")
+SECRET_KEY = os.getenv("SECRET_KEY", "change-me")
 ALGORITHM = "HS256"
 
 def _decode(token: str) -> dict:

@@ -13,7 +13,7 @@ from .deps import get_db
 from .models import UserAccount  # precisa existir em models.py
 
 # Config
-SECRET_KEY = os.environ.get("SECRET_KEY", "change-me")
+SECRET_KEY = os.getenv("SECRET_KEY", "change-me")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
 
