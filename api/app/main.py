@@ -6,9 +6,22 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .deps import get_db
-from .routes import catalog, sql, metrics, auth, sites, floorplans, devices, sensors, placements, thresholds, timeseries
+from .routes import (
+    catalog,
+    sql,
+    metrics,
+    auth,
+    sites,
+    floorplans,
+    devices,
+    sensors,
+    placements,
+    thresholds,
+    timeseries,
+)
 
 
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="LoraMon API")
@@ -42,20 +55,29 @@ def health():
  return {"ok": True}
 
 
-@app.get("/api/-/health/db")
+@app.get("/api/health/db")
 async def health_db(db: AsyncSession = Depends(get_db)):
-    """Verifica a conectividade com o banco de dados."""
+    """Verifica a conectividade com o banco de dados e conta linhas recentes."""
     try:
         result = await db.execute(
             text(
-                "SELECT current_database() AS database, current_user AS user, now() AS now"
+                """
+                SELECT
+                  current_database() AS db,
+                  current_user     AS usr,
+                  now()            AS ts,
+                  (SELECT COUNT(*)
+                     FROM ingest.measurement
+                    WHERE time > now() - interval '10 minutes') AS recent_rows
+                """
             )
         )
         row = result.mappings().one()
         return {
-            "database": row["database"],
-            "user": row["user"],
-            "now": row["now"].isoformat(),
+            "db": row["db"],
+            "usr": row["usr"],
+            "ts": row["ts"].isoformat(),
+            "recent_rows": row["recent_rows"],
         }
     except Exception as exc:  # pragma: no cover - log unexpected errors
         logger.exception("Database health check failed")

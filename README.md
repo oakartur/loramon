@@ -115,3 +115,29 @@ db/     # Migrações SQL
 - Os dados brutos não são deletados automaticamente; políticas de retenção aplicam-se apenas a `ingest.measurement`.
 - Revise a conta `admin` criada pela migração e defina credenciais seguras antes de exposição pública.
 - Ajuste `ALLOW_ORIGINS` para limitar o acesso da API apenas aos domínios desejados.
+
+## Diagnóstico e teste de rotas
+
+O `nginx` encaminha requisições para a API preservando o prefixo `/api`. O bloco
+
+```nginx
+location /api/ {
+  proxy_pass http://api:8000;
+}
+```
+
+evita que o prefixo seja removido (a versão anterior usava `proxy_pass
+http://api:8000/;` e resultava em respostas `404`).
+
+Com os serviços em execução via `docker compose`, os principais endpoints podem
+ser verificados com:
+
+```bash
+curl -s http://localhost:8900/api/health/db | jq
+curl -s "http://localhost:8900/api/metrics/overview?minutes=60" | jq
+curl -s "http://localhost:8900/api/catalog/devices?minutes=60" | jq
+curl -s "http://localhost:8900/api/catalog/metrics?minutes=60" | jq
+```
+
+Essas chamadas devem retornar dados e demonstrar que há sensores ativos na
+janela consultada.
