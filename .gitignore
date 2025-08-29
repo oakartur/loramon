@@ -1,0 +1,49 @@
+# --- Gerais
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+*.swo
+
+# --- Ambiente/segredos
+.env
+.env.*
+!.env.example            # mantenha apenas o exemplo
+
+# --- Python (api/etl)
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+dist/
+build/
+site/
+.coverage*
+htmlcov/
+
+# pastas de runtime opcionais no projeto
+api/app/static/uploads/
+api/app/static/.cache/
+etl/*.log
+
+# --- Node/Next.js (web)
+web/node_modules/
+web/.next/
+web/out/
+web/.vercel/
+web/.turbo/
+web/npm-debug.log*
+web/yarn-error.log*
+web/pnpm-lock.yaml   # se você NÃO usa pnpm; remova se usar
+web/.env.local
+web/.env*.local
+
+# --- Docker
+**/.dockerignore
+docker-*.log
+
