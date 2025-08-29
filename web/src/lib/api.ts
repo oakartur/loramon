@@ -8,10 +8,14 @@ function authHeaders(init?: RequestInit) {
     if (token) headers.set('Authorization', `Bearer ${token}`)
   }
   return headers
+
 }
 
 async function handle(r: Response, method: string, path: string) {
   if (!r.ok) {
+    if (r.status === 401) {
+      redirectToLogin()
+    }
     const text = await r.text().catch(() => '')
     throw new Error(`${method} ${path} -> ${r.status}: ${text}`)
   }
@@ -25,6 +29,7 @@ export async function apiGet<T>(path: string, init?: RequestInit): Promise<T> {
     ...init,
     method: 'GET',
     headers,
+
     cache: 'no-store',
   })
   return handle(r, 'GET', path)
@@ -37,6 +42,7 @@ export async function apiPost<T>(path: string, body: unknown, init?: RequestInit
     ...init,
     method: 'POST',
     headers,
+
     body: JSON.stringify(body),
   })
   return handle(r, 'POST', path)
