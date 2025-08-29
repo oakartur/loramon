@@ -10,6 +10,7 @@ import {
   CartesianGrid,
   Tooltip,
 } from 'recharts';
+import { apiGet } from '@/lib/api';
 
 type Overview = {
   sensors_ativos: number;
@@ -19,12 +20,6 @@ type Overview = {
 
 type Device = { id: string; name: string };
 type SeriesPoint = { ts: number; value: number };
-
-async function getJSON<T>(url: string): Promise<T> {
-  const r = await fetch(url, { cache: 'no-store' });
-  if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
-  return r.json();
-}
 
 function suggestedStep(mins: number): number {
   if (mins <= 30) return 15;
@@ -81,8 +76,8 @@ export default function DashboardPage() {
   useEffect(() => {
     (async () => {
       try {
-        const apps = await getJSON<{ value: string; label: string }[]>(
-          '/api/catalog/applications',
+        const apps = await apiGet<{ value: string; label: string }[]>(
+          '/catalog/applications',
         );
         setApplications(apps.map((a) => a.value));
       } catch {
@@ -94,7 +89,7 @@ export default function DashboardPage() {
   // Load overview whenever minutes changes or on tick
   const loadOverview = async () => {
     try {
-      const data = await getJSON<Overview>(`/api/metrics/overview?minutes=${minutes}`);
+      const data = await apiGet<Overview>(`/metrics/overview?minutes=${minutes}`);
       setOv(data);
     } catch {
       setOv(null);
@@ -129,10 +124,10 @@ export default function DashboardPage() {
   useEffect(() => {
     (async () => {
       try {
-        const url = application
-          ? `/api/catalog/devices?application=${encodeURIComponent(application)}`
-          : '/api/catalog/devices';
-        const devs = await getJSON<{ value: string; label: string }[]>(url);
+        const path = application
+          ? `/catalog/devices?application=${encodeURIComponent(application)}`
+          : '/catalog/devices';
+        const devs = await apiGet<{ value: string; label: string }[]>(path);
         setDevices(devs.map((d) => ({ id: d.value, name: d.label })));
       } catch {
         setDevices([]);
@@ -153,10 +148,10 @@ export default function DashboardPage() {
         if (application) params.set('application', application);
         if (device) params.set('device', device);
         const query = params.toString();
-        const url = query
-          ? `/api/catalog/metrics?${query}`
-          : '/api/catalog/metrics';
-        const mets = await getJSON<{ value: string; label: string }[]>(url);
+        const path = query
+          ? `/catalog/metrics?${query}`
+          : '/catalog/metrics';
+        const mets = await apiGet<{ value: string; label: string }[]>(path);
         setMetrics(mets.map((m) => m.value));
       } catch {
         setMetrics([]);
@@ -185,7 +180,7 @@ export default function DashboardPage() {
         step: String(step),
       });
       if (application) params.set('application', application);
-      const data = await getJSON<SeriesPoint[]>(`/api/metrics/series?${params}`);
+      const data = await apiGet<SeriesPoint[]>(`/metrics/series?${params}`);
       setSeries(data);
     } catch {
       setSeries([]);
