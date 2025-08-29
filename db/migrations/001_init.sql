@@ -93,10 +93,11 @@ ON CONFLICT DO NOTHING;
 CREATE TABLE IF NOT EXISTS app.metric_map (
  id bigserial PRIMARY KEY,
  application text NULL,
- device_prof text NULL,
+ device_profile text NULL,
  json_path text NOT NULL, -- ex.: '{object,decoded,temperature}'
  metric text NOT NULL, -- ex.: 'temperature_C'
- unit text NOT NULL -- ex.: '°C'
+ unit text NOT NULL, -- ex.: '°C'
+ enabled boolean NOT NULL DEFAULT true
 );
 
 -- RBAC e metadados do app
