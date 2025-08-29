@@ -70,7 +70,7 @@ A variável `SECRET_KEY` define a chave usada para assinar os tokens e `ACCESS_T
 
 ## ETL
 
-O script `etl/etl.py` utiliza `DATABASE_URL_SYNC` para conexão síncrona. Ele lê lotes de `raw.uplink`, extrai métricas numéricas do JSON, atualiza `ingest.measurement` e mantém um checkpoint em `ingest.etl_checkpoint`. As variáveis `ETL_BATCH` (tamanho do lote) e `ETL_SLEEP` (intervalo de polling) permitem ajustes finos.
+O script `etl/etl.py` utiliza `DATABASE_URL_SYNC` para conexão síncrona. Ele lê lotes de `raw.uplink`, extrai métricas numéricas do JSON, atualiza `ingest.measurement` e mantém um checkpoint em `ingest.etl_checkpoint`. As variáveis `ETL_BATCH` (tamanho do lote) e `ETL_SLEEP` (intervalo de polling) permitem ajustes finos. Consulte `etl/README.md` para detalhes sobre o formato de `json_path` e para usar o modo de diagnóstico com `python etl.py --once --limit 20 --verbose`.
 
 ## Frontend Web
 
