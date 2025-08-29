@@ -8,6 +8,15 @@ Plataforma interna para visualizar sensores LoRaWAN ingeridos em PostgreSQL/Time
 3. `docker compose build && docker compose up -d`.
 4. Web: `http://<vm>`; API docs: `http://<vm>:8000/docs`.
 
+## CORS
+Defina uma lista de domínios confiáveis para a API usando a variável de ambiente `ALLOW_ORIGINS`. Os domínios devem ser separados por vírgula. Exemplo:
+
+```env
+ALLOW_ORIGINS=https://app.exemplo.com,https://outro.exemplo.org
+```
+
+Inclua essa linha em `.env` ou exporte a variável antes de iniciar o serviço.
+
 ## Notas
 - ETL transforma `raw.uplink.payload` → `ingest.measurement`.
 - CAGGs (5m/1h) e retenção (90d) para performance.
