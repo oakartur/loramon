@@ -2,6 +2,7 @@
 
 Plataforma interna para monitorar sensores LoRaWAN armazenados em PostgreSQL/TimescaleDB. O projeto é dividido em três componentes principais:
 
+
 - **ETL**: processo que lê uplinks brutos e grava séries temporais normalizadas.
 - **API**: backend FastAPI que oferece autenticação, cadastro de ativos e consulta de métricas.
 - **Web**: frontend Next.js que consome a API e apresenta dashboards e plantas baixas.
