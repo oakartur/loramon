@@ -39,11 +39,39 @@ async def devices(
     return [{"value": v, "label": l} for (v, l) in rows]
 
 @router.get("/metrics")
-async def metrics(db: AsyncSession = Depends(get_db)):
-    q = text("""
-        SELECT DISTINCT metric AS value, metric AS label
-        FROM ingest.measurement
-        ORDER BY 1
-    """)
-    rows = (await db.execute(q)).all()
+async def metrics(
+    application: str | None = Query(default=None),
+    device: str | None = Query(default=None),
+    minutes: int = 60,
+    db: AsyncSession = Depends(get_db),
+):
+    params: dict[str, object] = {"mins": minutes}
+
+    filters = ["m.\"time\" >= now() - (:mins * interval '1 minute')"]
+
+    if device:
+        filters.append("m.device_id = :device")
+        params["device"] = device
+
+    if application:
+        filters.append(
+            "m.device_id IN (SELECT DISTINCT u.device_name FROM raw.uplink u WHERE u.application_name = :app)"
+        )
+        params["app"] = application
+
+    where_clause = " AND ".join(filters)
+
+    q = text(
+        f"""
+        SELECT DISTINCT m.metric AS value,
+               COALESCE(mm.label, m.metric) AS label
+        FROM ingest.measurement m
+        LEFT JOIN app.metric_map mm
+               ON mm.metric = m.metric AND COALESCE(mm.enabled, TRUE)
+        WHERE {where_clause}
+        ORDER BY 2
+        """
+    )
+
+    rows = (await db.execute(q, params)).all()
     return [{"value": v, "label": l} for (v, l) in rows]
