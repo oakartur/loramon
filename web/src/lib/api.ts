@@ -11,6 +11,13 @@ function authHeaders(init?: RequestInit) {
 
 }
 
+function redirectToLogin() {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('token')
+    location.href = '/login'
+  }
+}
+
 async function handle(r: Response, method: string, path: string) {
   if (!r.ok) {
     if (r.status === 401) {
