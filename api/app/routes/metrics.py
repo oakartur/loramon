@@ -28,7 +28,15 @@ async def overview(
           (SELECT COUNT(*) FROM app.sensor_threshold) AS total_alertas_config
     """)
     row = (await db.execute(q, {"mins": minutes})).mappings().one()
-    return dict(row)
+    last_update = row["ultima_atualizacao"]
+    return {
+        "sensors_ativos": row["sensors_ativos"],
+        "ultima_atualizacao": last_update.isoformat(),
+        "total_alertas_config": row["total_alertas_config"],
+        "active_sensors": row["sensors_ativos"],
+        "last_update": last_update.isoformat(),
+        "alerts_configured": row["total_alertas_config"],
+    }
 
 
 @router.get("/series")

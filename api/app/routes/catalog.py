@@ -7,13 +7,16 @@ router = APIRouter(prefix="/catalog", tags=["catalog"])
 
 @router.get("/applications")
 async def applications(db: AsyncSession = Depends(get_db)):
-    q = text("""
-        SELECT application_name AS value, application_name AS label
-        FROM raw.uplink
-        WHERE COALESCE(application_name, '') <> ''
-        GROUP BY application_name
-        ORDER BY application_name
-    """)
+    q = text(
+        """
+        SELECT DISTINCT application_name AS value,
+               application_name        AS label
+          FROM raw.uplink
+         WHERE ts > now() - interval '7 days'
+           AND COALESCE(application_name, '') <> ''
+         ORDER BY 1
+        """
+    )
     rows = (await db.execute(q)).all()
     return [{"value": v, "label": l} for (v, l) in rows]
 
