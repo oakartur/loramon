@@ -152,9 +152,11 @@ export default function DashboardPage() {
         const params = new URLSearchParams();
         if (application) params.set('application', application);
         if (device) params.set('device', device);
-        const mets = await getJSON<{ value: string; label: string }[]>(
-          `/api/catalog/metrics?${params.toString()}`,
-        );
+        const query = params.toString();
+        const url = query
+          ? `/api/catalog/metrics?${query}`
+          : '/api/catalog/metrics';
+        const mets = await getJSON<{ value: string; label: string }[]>(url);
         setMetrics(mets.map((m) => m.value));
       } catch {
         setMetrics([]);
