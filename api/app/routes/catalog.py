@@ -19,32 +19,23 @@ async def applications(db: AsyncSession = Depends(get_db)):
 
 @router.get("/devices")
 async def devices(
-    application: str | None = Query(default=None),
+    minutes: int = Query(default=60, gt=0),
     db: AsyncSession = Depends(get_db),
 ):
-    if application:
-        q = text("""
-            SELECT d.device_id AS value,
-                   COALESCE(d.device_name, d.device_id) AS label
-            FROM app.device_catalog d
-            WHERE d.device_id IN (
-                SELECT DISTINCT u.device_name
-                FROM raw.uplink u
-                WHERE u.application_name = :app
-                  AND COALESCE(u.device_name, '') <> ''
-            )
-            ORDER BY label
-        """)
-        rows = (await db.execute(q, {"app": application})).all()
-    else:
-        q = text("""
-            SELECT d.device_id AS value,
-                   COALESCE(d.device_name, d.device_id) AS label
-            FROM app.device_catalog d
-            ORDER BY label
-        """)
-        rows = (await db.execute(q)).all()
-
+    q = text(
+        """
+        SELECT m.device_id AS value,
+               COALESCE(dc.device_name, m.device_id) AS label
+        FROM (
+            SELECT DISTINCT device_id
+            FROM ingest.measurement
+            WHERE time > now() - (:minutes * INTERVAL '1 minute')
+        ) m
+        LEFT JOIN app.device_catalog dc ON dc.device_id = m.device_id
+        ORDER BY label
+        """
+    )
+    rows = (await db.execute(q, {"minutes": minutes})).all()
     return [{"value": v, "label": l} for (v, l) in rows]
 
 @router.get("/metrics")
