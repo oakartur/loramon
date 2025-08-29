@@ -1,6 +1,7 @@
 // web/src/app/floorplans/upload/page.tsx
 'use client'
 import { useState } from 'react'
+import { apiPostForm } from '@/lib/api'
 
 export default function UploadFloorplan() {
   const [siteId, setSiteId] = useState<number>(1)
@@ -14,12 +15,15 @@ export default function UploadFloorplan() {
     fd.append('site_id', String(siteId))
     fd.append('name', name || file.name)
     fd.append('file', file)
-    const r = await fetch(`${process.env.NEXT_PUBLIC_API_BASE || '/api'}/floorplans/upload`, {
-      method: 'POST', body: fd
-    })
-    if (!r.ok) return setMsg(`Falhou: ${await r.text()}`)
-    const data = await r.json()
-    setMsg(`OK! id=${data.id}`)
+    try {
+      const data = await apiPostForm<{ id: number }>(
+        '/floorplans/upload',
+        fd
+      )
+      setMsg(`OK! id=${data.id}`)
+    } catch (e: any) {
+      setMsg(`Falhou: ${e?.message ?? e}`)
+    }
   }
 
   return (
