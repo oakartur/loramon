@@ -11,7 +11,7 @@ function authHeaders(init?: RequestInit) {
 
 }
 
-function redirectToLogin() {
+export function redirectToLogin() {
   if (typeof window !== 'undefined') {
     localStorage.removeItem('token')
     location.href = '/login'
