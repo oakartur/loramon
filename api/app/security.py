@@ -27,9 +27,9 @@ def verify_password(plain: str, hashed: str) -> bool:
     return pwd_context.verify(plain, hashed)
 
 # JWT
-def create_token(sub: str, expires_delta: Optional[timedelta] = None) -> str:
+def create_token(sub: str, role: str, expires_delta: Optional[timedelta] = None) -> str:
     expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
-    to_encode = {"sub": sub, "exp": expire}
+    to_encode = {"sub": sub, "role": role, "exp": expire}
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 def decode_token(token: str) -> dict:

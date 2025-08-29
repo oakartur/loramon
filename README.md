@@ -3,7 +3,8 @@
 Plataforma interna para visualizar sensores LoRaWAN ingeridos em PostgreSQL/TimescaleDB.
 
 ## Subir
-1. Copie `.env.example` para `.env` e ajuste credenciais do banco e `SECRET_KEY`.
+1. Copie `.env.example` para `.env` e ajuste `DATABASE_URL`, `DATABASE_URL_SYNC` e `SECRET_KEY`.
+   Se o PostgreSQL estiver rodando fora do Docker, utilize `host.docker.internal` como host em `DATABASE_URL`.
 2. Aplique migração: `psql "$DATABASE_URL_SYNC" -f db/migrations/001_init.sql`.
 3. `docker compose build && docker compose up -d`.
 4. Web: `http://<vm>`; API docs: `http://<vm>:8000/docs`.
