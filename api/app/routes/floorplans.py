@@ -1,4 +1,3 @@
-from pathlib import Path
 from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
@@ -6,10 +5,9 @@ from ..deps import get_db
 from ..utils import admin_required, auth_required
 from ..services.pdf_render import save_pdf, render_page_to_png, FLOORPLAN_DIR
 import os
+import uuid
 
 router = APIRouter(prefix="/floorplans", tags=["floorplans"])
-UPLOAD_DIR = Path("/app/app/static/floorplans")
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 @router.post("/upload", dependencies=[Depends(admin_required)])
 async def upload_floorplan(
@@ -22,7 +20,7 @@ async def upload_floorplan(
 
  if not file.filename.endswith(".pdf"):
   raise HTTPException(400, "Apenas PDF")
- filename = file.filename
+ filename = f"{uuid.uuid4()}.pdf"
  content = await file.read()
  path = save_pdf(content, filename)
  png = render_page_to_png(path, page_index)
@@ -52,25 +50,3 @@ async def get_floorplan_image(floorplan_id: str, db: AsyncSession = Depends(get_
  from fastapi.responses import FileResponse
  return FileResponse(png_path)
 
-@router.post("/upload")
-async def upload_floorplan(
-    site_id: int = Form(...),
-    name: str = Form(...),
-    file: UploadFile = File(...)
-    , db = Depends(get_db)
-):
-    if file.content_type not in ("application/pdf",):
-        raise HTTPException(400, "Envie um PDF.")
-    fname = f"{uuid.uuid4()}.pdf"
-    dest = UPLOAD_DIR / fname
-    data = await file.read()
-    dest.write_bytes(data)
-
-    q = text("""
-      insert into app.floorplan (site_id, name, file_path, mime_type)
-      values (:site_id, :name, :path, 'application/pdf')
-      returning id
-    """)
-    r = await db.execute(q, {"site_id": site_id, "name": name, "path": str(dest)})
-    await db.commit()
-    return {"id": r.scalar(), "name": name}
