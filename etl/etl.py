@@ -2,10 +2,14 @@
 import os
 import time
 import traceback
+import logging
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 import psycopg
 from psycopg.rows import dict_row
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # -----------------------------------------------------------------------------
 # Config
@@ -104,7 +108,9 @@ def set_checkpoint(cur, new_id: int) -> None:
 # Loop principal
 # -----------------------------------------------------------------------------
 def run_once() -> None:
+    logger.info("Connecting to database")
     with psycopg.connect(DSN, autocommit=False) as conn:
+        logger.info("Database connection established")
         with conn.cursor(row_factory=dict_row) as cur:
 
             # 1) Tenta carregar mapping; se falhar, ROLLBACK e segue sem mapping
@@ -133,6 +139,7 @@ def run_once() -> None:
                     (last_id, BATCH),
                 )
                 rows = cur.fetchall()
+                logger.info("Fetched %d rows from raw.uplink after id %d", len(rows), last_id)
             except Exception as e:
                 # Se algo deu errado aqui (ex. tabela não existe), zera a transação e tenta depois
                 conn.rollback()
@@ -142,6 +149,7 @@ def run_once() -> None:
 
             if not rows:
                 conn.commit()
+                logger.info("No new rows found; sleeping %.1f seconds", SLEEP_SEC)
                 time.sleep(SLEEP_SEC)
                 return
 
