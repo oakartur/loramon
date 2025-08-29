@@ -6,12 +6,14 @@ from .routes import catalog, sql, metrics, auth, sites, floorplans, devices, sen
 app = FastAPI(title="LoraMon API")
 
 
+origins = os.getenv("ALLOW_ORIGINS", "*")
+
 app.add_middleware(
- CORSMiddleware,
- allow_origins=["*"], # rede interna; ajuste depois
- allow_credentials=True,
- allow_methods=["*"],
- allow_headers=["*"],
+    CORSMiddleware,
+    allow_origins=[origin.strip() for origin in origins.split(",") if origin.strip()],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
