@@ -38,6 +38,21 @@ Execute a migração com:
 psql "$DATABASE_URL_SYNC" -f db/migrations/001_init.sql
 ```
 
+Para atualizar um banco existente criado antes desta versão, aplique a migração incremental:
+
+```bash
+psql "$DATABASE_URL_SYNC" -f db/migrations/002_metric_map_device_profile_enabled.sql
+```
+
+### Atualização manual de bancos existentes
+
+Alternativamente, você pode executar diretamente os comandos:
+
+```sql
+ALTER TABLE app.metric_map RENAME COLUMN device_prof TO device_profile;
+ALTER TABLE app.metric_map ADD COLUMN enabled boolean NOT NULL DEFAULT true;
+```
+
 ## API
 
 A API é implementada em FastAPI e inclui middleware de CORS configurável via `ALLOW_ORIGINS`. Autenticação usa JWT (`/api/auth/login`). As principais rotas incluem:
